@@ -71,6 +71,101 @@
     margin: 0 10px;
 }
 
+.comparison-container {
+    margin: 20px 0;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.comparison-canvas {
+    border: 2px solid #e0e0e0;
+    margin-bottom: 20px;
+}
+
+.metrics-container {
+    margin-top: 20px;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+}
+
+.metrics-display {
+    margin: 10px 0;
+}
+
+.metric-row {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.metric-label {
+    flex: 1;
+    font-weight: bold;
+    color: #333;
+}
+
+.metric-value {
+    flex: 1;
+    text-align: center;
+    padding: 0 10px;
+}
+
+.metric-value:first-child {
+    border-right: 2px solid #eee;
+}
+
+.timeline-canvas {
+    margin: 20px 0;
+    border: 1px solid #ddd;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.timeline-label {
+    font-size: 12px;
+    color: #666;
+    margin: 5px 0;
+}
+
+.download-button {
+    margin-top: 20px;
+    padding: 12px 24px;
+    background: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.download-button:hover {
+    background: #1976D2;
+}
+
+.phase-indicator {
+    position: absolute;
+    top: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 5px 10px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.phase-indicator.left {
+    left: 10px;
+}
+
+.phase-indicator.right {
+    right: 10px;
+}
+
 .recording-button {
     position: fixed;
     top: 20px;

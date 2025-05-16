@@ -204,12 +204,169 @@ async function setupPoseDetection() {
     }
 
     // Add swing comparison
+    function calculateSwingMetrics(swingData) {
+        const metrics = {
+            duration: 0,
+            maxElbowAngle: 0,
+            minElbowAngle: 180,
+            angularVelocities: [],
+            contactTime: null,
+            followThroughTime: null
+        };
+
+        let lastAngle = null;
+        let startTime = swingData[0].timestamp;
+
+        swingData.forEach((frame, index) => {
+            const angle = calculateAngle(
+                frame.pose.keypoints[12],
+                frame.pose.keypoints[14],
+                frame.pose.keypoints[16]
+            );
+
+            metrics.maxElbowAngle = Math.max(metrics.maxElbowAngle, angle);
+            metrics.minElbowAngle = Math.min(metrics.minElbowAngle, angle);
+
+            if (lastAngle !== null) {
+                const timeDiff = (frame.timestamp - swingData[index - 1].timestamp) / 1000;
+                const angleDiff = angle - lastAngle;
+                const angularVelocity = angleDiff / timeDiff;
+                metrics.angularVelocities.push(angularVelocity);
+            }
+
+            lastAngle = angle;
+
+            // Detect swing phases
+            if (frame.phase === SWING_PHASES.CONTACT && !metrics.contactTime) {
+                metrics.contactTime = frame.timestamp;
+            }
+            if (frame.phase === SWING_PHASES.FOLLOW_THROUGH && !metrics.followThroughTime) {
+                metrics.followThroughTime = frame.timestamp;
+            }
+        });
+
+        metrics.duration = (swingData[swingData.length - 1].timestamp - startTime) / 1000;
+        metrics.avgAngularVelocity = metrics.angularVelocities.reduce((a, b) => a + b, 0) / metrics.angularVelocities.length;
+        
+        return metrics;
+    }
+
     function compareSwings(swing1, swing2) {
+        const comparisonContainer = document.createElement('div');
+        comparisonContainer.className = 'comparison-container';
+        playbackContainer.appendChild(comparisonContainer);
+
+        // Create comparison canvas
         const comparisonCanvas = document.createElement('canvas');
+        comparisonCanvas.className = 'comparison-canvas';
         comparisonCanvas.width = video.videoWidth * 2;
         comparisonCanvas.height = video.videoHeight;
-        playbackContainer.appendChild(comparisonCanvas);
+        comparisonContainer.appendChild(comparisonCanvas);
         const comparisonCtx = comparisonCanvas.getContext('2d');
+
+        // Create metrics display
+        const metricsContainer = document.createElement('div');
+        metricsContainer.className = 'metrics-container';
+        comparisonContainer.appendChild(metricsContainer);
+
+        // Calculate metrics for both swings
+        const metrics1 = calculateSwingMetrics(swing1);
+        const metrics2 = calculateSwingMetrics(swing2);
+
+        // Display metrics comparison
+        const metricsDisplay = document.createElement('div');
+        metricsDisplay.className = 'metrics-display';
+        metricsDisplay.innerHTML = `
+            <h3>Swing Comparison Metrics</h3>
+            <div class="metric-row">
+                <div class="metric-label">Duration</div>
+                <div class="metric-value">${metrics1.duration.toFixed(2)}s</div>
+                <div class="metric-value">${metrics2.duration.toFixed(2)}s</div>
+            </div>
+            <div class="metric-row">
+                <div class="metric-label">Max Elbow Angle</div>
+                <div class="metric-value">${metrics1.maxElbowAngle.toFixed(1)}°</div>
+                <div class="metric-value">${metrics2.maxElbowAngle.toFixed(1)}°</div>
+            </div>
+            <div class="metric-row">
+                <div class="metric-label">Min Elbow Angle</div>
+                <div class="metric-value">${metrics1.minElbowAngle.toFixed(1)}°</div>
+                <div class="metric-value">${metrics2.minElbowAngle.toFixed(1)}°</div>
+            </div>
+            <div class="metric-row">
+                <div class="metric-label">Avg Angular Velocity</div>
+                <div class="metric-value">${metrics1.avgAngularVelocity.toFixed(2)}°/s</div>
+                <div class="metric-value">${metrics2.avgAngularVelocity.toFixed(2)}°/s</div>
+            </div>
+        `;
+        metricsContainer.appendChild(metricsDisplay);
+
+        // Create timeline visualization
+        const timelineCanvas = document.createElement('canvas');
+        timelineCanvas.className = 'timeline-canvas';
+        timelineCanvas.width = 800;
+        timelineCanvas.height = 200;
+        metricsContainer.appendChild(timelineCanvas);
+        const timelineCtx = timelineCanvas.getContext('2d');
+
+        function drawTimeline() {
+            timelineCtx.clearRect(0, 0, timelineCanvas.width, timelineCanvas.height);
+            
+            // Draw timeline grid
+            timelineCtx.strokeStyle = '#ddd';
+            for (let i = 0; i < timelineCanvas.width; i += 50) {
+                timelineCtx.beginPath();
+                timelineCtx.moveTo(i, 0);
+                timelineCtx.lineTo(i, timelineCanvas.height);
+                timelineCtx.stroke();
+            }
+
+            // Draw angle curves
+            timelineCtx.strokeStyle = '#4CAF50';
+            timelineCtx.beginPath();
+            let lastX = 0;
+            let lastY = 0;
+            
+            swing1.forEach((frame, index) => {
+                const x = (index / swing1.length) * timelineCanvas.width;
+                const angle = calculateAngle(
+                    frame.pose.keypoints[12],
+                    frame.pose.keypoints[14],
+                    frame.pose.keypoints[16]
+                );
+                const y = timelineCanvas.height - (angle / 180) * timelineCanvas.height;
+                
+                if (index === 0) {
+                    timelineCtx.moveTo(x, y);
+                } else {
+                    timelineCtx.lineTo(x, y);
+                }
+                lastX = x;
+                lastY = y;
+            });
+            timelineCtx.stroke();
+
+            timelineCtx.strokeStyle = '#2196F3';
+            timelineCtx.beginPath();
+            swing2.forEach((frame, index) => {
+                const x = (index / swing2.length) * timelineCanvas.width;
+                const angle = calculateAngle(
+                    frame.pose.keypoints[12],
+                    frame.pose.keypoints[14],
+                    frame.pose.keypoints[16]
+                );
+                const y = timelineCanvas.height - (angle / 180) * timelineCanvas.height;
+                
+                if (index === 0) {
+                    timelineCtx.moveTo(x, y);
+                } else {
+                    timelineCtx.lineTo(x, y);
+                }
+            });
+            timelineCtx.stroke();
+        }
+
+        drawTimeline();
 
         let index1 = 0;
         let index2 = 0;
@@ -233,13 +390,41 @@ async function setupPoseDetection() {
                 drawPoses([pose2], comparisonCtx);
                 comparisonCtx.restore();
 
+                // Draw phase indicators
+                comparisonCtx.font = '16px Arial';
+                comparisonCtx.fillStyle = '#4CAF50';
+                comparisonCtx.fillText(swing1[index1].phase, 10, 20);
+                comparisonCtx.fillStyle = '#2196F3';
+                comparisonCtx.fillText(swing2[index2].phase, video.videoWidth + 10, 20);
+
                 index1++;
                 index2++;
             } else {
                 clearInterval(comparisonInterval);
-                playbackContainer.removeChild(comparisonCanvas);
+                comparisonContainer.appendChild(createDownloadButton(swing1, swing2));
             }
         }, 100);
+
+        function createDownloadButton(swing1, swing2) {
+            const button = document.createElement('button');
+            button.textContent = 'Download Comparison Data';
+            button.onclick = () => {
+                const data = {
+                    swing1: swing1,
+                    swing2: swing2,
+                    metrics1: metrics1,
+                    metrics2: metrics2
+                };
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'swing_comparison.json';
+                a.click();
+                URL.revokeObjectURL(url);
+            };
+            return button;
+        }
     }
 
     // Add recording completion handler
