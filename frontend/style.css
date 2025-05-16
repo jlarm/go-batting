@@ -33,3 +33,67 @@
     margin-top: 20px;
     font-size: 14px;
 }
+
+.playback-container {
+    margin: 20px 0;
+    padding: 10px;
+    background: #f0f0f0;
+    border-radius: 8px;
+}
+
+.playback-container button {
+    margin: 5px;
+    padding: 8px 16px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.playback-container button:hover {
+    background: #45a049;
+}
+
+.playback-container canvas {
+    border: 1px solid #ccc;
+    margin: 10px 0;
+}
+
+.playback-container canvas.comparison {
+    display: flex;
+    justify-content: space-between;
+}
+
+.playback-container canvas.comparison > canvas {
+    flex: 1;
+    margin: 0 10px;
+}
+
+.recording-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    padding: 12px 24px;
+    background: #ff4444;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.recording-button:hover {
+    background: #ff2222;
+}
+
+.recording-button.recording {
+    background: #4CAF50;
+}
+
+.recording-button.recording:hover {
+    background: #45a049;
+}
