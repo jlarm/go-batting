@@ -1,0 +1,35 @@
+.container {
+    display: flex;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.video-container {
+    flex: 2;
+}
+
+#video {
+    width: 100%;
+    max-height: 600px;
+}
+
+#outputCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+.analysis-panel {
+    flex: 1;
+    margin-left: 20px;
+    padding: 20px;
+    background: #f5f5f5;
+    border-radius: 8px;
+}
+
+#analysisResults {
+    margin-top: 20px;
+    font-size: 14px;
+}

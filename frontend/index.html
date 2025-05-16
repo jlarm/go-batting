@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Batting Swing Analyzer</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="video-container">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="outputCanvas"></canvas>
+        </div>
+        <div class="analysis-panel">
+            <h2>Swing Analysis</h2>
+            <div id="analysisResults"></div>
+        </div>
+    </div>
+    <script src="main.js"></script>
+</body>
+</html>
